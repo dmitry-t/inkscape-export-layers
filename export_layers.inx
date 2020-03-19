@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+    <_name>Export layers</_name>
+
+    <id>com.over9000.export-layers-2</id>
+
+    <dependency type="executable" location="extensions">export_layers.py</dependency>
+
+    <param name="output-dir" type="string" _gui-text="Directory to export to">~/</param>
+
+    <param name="fit-contents" type="optiongroup" appearance="minimal" _gui-text="Area to export">
+        <option value="false" selected="selected">Use document boundaries</option>
+        <option value="true">Fit to document contents</option>
+    </param>
+
+    <param name="file-type" type="optiongroup" appearance="minimal" _gui-text="Output file type">
+        <option value="png" selected="selected">PNG</option>
+        <option value="svg">SVG</option>
+        <option value="jpeg">JPEG (requires ImageMagick)</option>
+    </param>
+
+    <param name="dpi" type="int" min="1" max="1024" appearance="minimal" _gui-text="Export DPI">96</param>
+
+    <param name="enumerate" type="boolean" _gui-text="Add number prefixes to exported filenames (001_, 002_ etc)">true
+    </param>
+
+    <param name="help" type="description">Every layer marked with the prefix "[export]" is exported into a separate
+        file. All layers marked with the prefix "[fixed]" are additionally exported into every such file.
+    </param>
+
+    <effect needs-live-preview="false">
+        <object-type>all</object-type>
+        <effects-menu>
+            <submenu _name="Export"/>
+        </effects-menu>
+    </effect>
+
+    <script>
+        <command reldir="extensions" interpreter="python">export_layers.py</command>
+    </script>
+</inkscape-extension>
