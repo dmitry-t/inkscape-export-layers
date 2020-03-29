@@ -1,12 +1,12 @@
 # Inkscape Export Layers 2
 
-Inkscape extension to export SVG layers as standalone PNG or SVG images.
+Inkscape extension to export SVG layers as standalone PNG, SVG or JPEG images.
 The exported images can be a combination of multiple layers.
 
 ## How it works
 
 To export your Inkscape file as an image open an inkscape file with multiple layers
-(otherwise you can simply use the in-built export tool 'Ctrl + E').
+(otherwise you can simply use the in-built export tool `Ctrl + E`).
 
 There are two options for your layers when exporting:
 - `[fixed]`: If a layer label starts with the prefix `[fixed]` this layer is always exported and
@@ -22,8 +22,8 @@ The order of layers remains untouched during export, i.e. a higher layer in the 
 
 The layer `[fixed] Background` is a fixed layer and will always be exported combined with the `[export]` layers.
 
-Once export is complete, we get two images: the combination of `Version 1` + `Background` and
-`Version 1` + `Background`.
+Once export is complete, we get two images: the combination of `version 1` + `Background` and
+`version 2` + `Background`.
 
 ## How to use
 
