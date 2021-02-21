@@ -4,7 +4,7 @@
 
     <id>com.over9000.export-layers-2</id>
 
-    <dependency type="executable" location="extensions">export_layers.py</dependency>
+    <dependency type="executable" location="inx">export_layers.py</dependency>
 
     <param name="output-dir" type="string" _gui-text="Directory to export to">~/</param>
 
@@ -19,7 +19,7 @@
         <option value="jpeg">JPEG (requires ImageMagick)</option>
     </param>
 
-    <param name="dpi" type="int" min="1" max="1024" appearance="minimal" _gui-text="Export DPI">96</param>
+    <param name="dpi" type="int" min="1" max="1024" _gui-text="Export DPI">96</param>
 
     <param name="enumerate" type="boolean" _gui-text="Add number prefixes to exported filenames (001_, 002_ etc)">true
     </param>
@@ -36,6 +36,6 @@
     </effect>
 
     <script>
-        <command reldir="extensions" interpreter="python">export_layers.py</command>
+        <command location="inx" interpreter="python">export_layers.py</command>
     </script>
 </inkscape-extension>

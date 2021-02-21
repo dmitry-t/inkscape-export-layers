@@ -10,6 +10,7 @@ import tempfile
 
 sys.path.append('/usr/share/inkscape/extensions')
 import inkex
+inkex.localization.localize()
 
 Layer = collections.namedtuple('Layer', ['id', 'label', 'tag'])
 Export = collections.namedtuple('Export', ['visible_layers', 'file_name'])
@@ -25,39 +26,43 @@ JPEG = 'jpeg'
 class LayerExport(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option('-o', '--output-dir',
+        self.arg_parser.add_argument('-o', '--output-dir',
                                      action='store',
-                                     type='string',
+                                     type=str,
                                      dest='output_dir',
                                      default='~/',
                                      help='Path to an output directory')
-        self.OptionParser.add_option('-f', '--file-type',
+        self.arg_parser.add_argument('-f', '--file-type',
                                      action='store',
-                                     type='choice',
                                      choices=(PNG, SVG, JPEG),
                                      dest='file_type',
                                      default='png',
                                      help='Exported file type')
-        self.OptionParser.add_option('--fit-contents',
+        self.arg_parser.add_argument('--fit-contents',
                                      action='store',
-                                     type='inkbool',
+                                     type=str,
                                      dest='fit_contents',
                                      default=False,
                                      help='Fit output to content bounds')
-        self.OptionParser.add_option('--dpi',
+        self.arg_parser.add_argument('--dpi',
                                      action='store',
-                                     type='int',
+                                     type=int,
                                      dest='dpi',
                                      default=None,
                                      help="Export DPI value")
-        self.OptionParser.add_option('--enumerate',
+        self.arg_parser.add_argument('--enumerate',
                                      action='store',
-                                     type='inkbool',
+                                     type=str,
                                      dest='enumerate',
                                      default=None,
                                      help="Export DPI value")
 
     def effect(self):
+        
+        #process bool inputs that were read as strings
+        self.options.fit_contents = True if self.options.fit_contents == 'true' else False
+        self.options.enumerate    = True if self.options.enumerate    == 'true' else False
+
         output_dir = os.path.expanduser(self.options.output_dir)
         if not os.path.exists(os.path.join(output_dir)):
             os.makedirs(os.path.join(output_dir))
@@ -161,16 +166,16 @@ class LayerExport(inkex.Effect):
         output_file = os.path.join(output_dir, file_name + '.png')
         command = [
             'inkscape',
-            '--export-area-drawing' if self.options.fit_contents else
+            svg_file.encode('utf-8'),
+            '--batch-process', 
+            '--export-area-drawing' if self.options.fit_contents else 
             '--export-area-page',
             '--export-dpi', str(self.options.dpi),
-            '--export-png', output_file.encode('utf-8'),
-            svg_file.encode('utf-8')
+            '--export-type', 'png',
+            '--export-filename', output_file.encode('utf-8'),
         ]
-        p = subprocess.Popen(command,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
-        if p.wait() != 0:
+        result = subprocess.run(command, capture_output=True)
+        if result.returncode != 0:
             raise Exception('Failed to convert %s to PNG' % svg_file)
 
         return output_file
@@ -186,18 +191,18 @@ class LayerExport(inkex.Effect):
         output_file = os.path.join(output_dir, file_name + '.svg')
         command = [
             'inkscape',
-            '--export-area-drawing' if self.options.fit_contents else
+            svg_file.encode('utf-8'),    
+            '--batch-process', 
+            '--export-area-drawing' if self.options.fit_contents else 
             '--export-area-page',
             '--export-dpi', str(self.options.dpi),
-            '--export-plain-svg', output_file.encode('utf-8'),
+            '--export-plain-svg', 
             '--vacuum-defs',
-            svg_file.encode('utf-8')
+            '--export-filename',output_file.encode('utf-8')
         ]
-        p = subprocess.Popen(command,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
-        if p.wait() != 0:
-            raise Exception('Failed to convert %s to PNG' % svg_file)
+        result = subprocess.run(command, capture_output=True)
+        if result.returncode != 0:
+            raise Exception('Failed to convert %s to SVG' % svg_file)
 
         return output_file
 
@@ -215,10 +220,8 @@ class LayerExport(inkex.Effect):
         file_name = os.path.splitext(os.path.basename(png_file))[0]
         output_file = os.path.join(output_dir, file_name + '.jpeg')
         command = ['convert', png_file, output_file]
-        p = subprocess.Popen(command,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
-        if p.wait() != 0:
+        result = subprocess.run(command, capture_output=True)
+        if result.returncode != 0:
             raise Exception('Is ImageMagick installed?\n'
                             'Failed to convert %s to JPEG' % png_file)
 
@@ -236,7 +239,7 @@ def _make_temp_directory():
 
 if __name__ == '__main__':
     try:
-        LayerExport().affect(output=False)
+        LayerExport().run(output=False)
     except Exception as e:
         inkex.errormsg(str(e))
         sys.exit(1)

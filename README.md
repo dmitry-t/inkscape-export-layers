@@ -37,3 +37,8 @@ Inkscape does not support file selection dialogs for extensions).
 1. Choose a required DPI.
 1. Choose whether to enumerate exported files with prefixes (`001_`, `002_` etc).
 1. Click `Apply`.
+
+## Requirements
+
+1. Make sure the 'inkscape' program is available from the command line. This may not be the case if you are using flatpack installation.
+1. 'convert' must be available to export to jpeg
