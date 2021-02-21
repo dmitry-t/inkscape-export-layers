@@ -18,8 +18,9 @@ Export = collections.namedtuple('Export', ['visible_layers', 'file_name'])
 FIXED = '[fixed]'
 EXPORT = '[export]'
 
-PNG = 'png'
+PDF = 'pdf'
 SVG = 'svg'
+PNG = 'png'
 JPEG = 'jpeg'
 
 
@@ -34,7 +35,7 @@ class LayerExport(inkex.Effect):
                                      help='Path to an output directory')
         self.arg_parser.add_argument('-f', '--file-type',
                                      action='store',
-                                     choices=(PNG, SVG, JPEG),
+                                     choices=(PDF, PNG, SVG, JPEG),
                                      dest='file_type',
                                      default='png',
                                      help='Exported file type')
@@ -78,6 +79,9 @@ class LayerExport(inkex.Effect):
                         break
                 elif self.options.file_type == SVG:
                     if not self.convert_svg_to_svg(svg_file, output_dir):
+                        break
+                elif self.options.file_type == PDF:
+                    if not self.convert_svg_to_pdf(svg_file, output_dir):
                         break
                 elif self.options.file_type == JPEG:
                     if not self.convert_png_to_jpeg(
@@ -203,6 +207,30 @@ class LayerExport(inkex.Effect):
         result = subprocess.run(command, capture_output=True)
         if result.returncode != 0:
             raise Exception('Failed to convert %s to SVG' % svg_file)
+
+        return output_file
+
+    def convert_svg_to_pdf(self, svg_file, output_dir):
+        """
+        Convert an [Inkscape] SVG file into a pdf.
+        :param str svg_file: Path an input SVG file.
+        :param str output_dir: Path to an output directory.
+        :return Output file path.
+        """
+        file_name = os.path.splitext(os.path.basename(svg_file))[0]
+        output_file = os.path.join(output_dir, file_name + '.pdf')
+        command = [
+            'inkscape',
+            svg_file.encode('utf-8'),    
+            '--batch-process', 
+            '--export-area-drawing' if self.options.fit_contents else 
+            '--export-area-page',
+            '--export-type=pdf', 
+            '--export-filename',output_file.encode('utf-8')
+        ]
+        result = subprocess.run(command, capture_output=True)
+        if result.returncode != 0:
+            raise Exception('Failed to convert %s to PDF' % svg_file)
 
         return output_file
 

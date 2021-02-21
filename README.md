@@ -1,6 +1,6 @@
 # Inkscape Export Layers 2
 
-Inkscape extension to export SVG layers as standalone PNG, SVG or JPEG images.
+Inkscape extension to export SVG layers as standalone PDF, PNG, SVG or JPEG images.
 The exported images can be a combination of multiple layers.
 
 ## How it works
@@ -33,7 +33,7 @@ To use the extension once your layers are ready:
 1. Type or paste the path of a directory you want to export your files to (unfortunately,
 Inkscape does not support file selection dialogs for extensions).
 1. Choose area to export - either document canvas area or contents area. 
-1. Choose a format of your export - `PNG`, `SVG` or `JPEG` (`JPEG` required the `ImageMagick` installed in your system).
+1. Choose a format of your export - `PDF`, `PNG`, `SVG` or `JPEG` (`JPEG` required the `ImageMagick` installed in your system).
 1. Choose a required DPI.
 1. Choose whether to enumerate exported files with prefixes (`001_`, `002_` etc).
 1. Click `Apply`.

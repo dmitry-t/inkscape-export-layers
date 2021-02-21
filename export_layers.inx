@@ -14,8 +14,9 @@
     </param>
 
     <param name="file-type" type="optiongroup" appearance="minimal" _gui-text="Output file type">
-        <option value="png" selected="selected">PNG</option>
+        <option value="pdf">PDF</option>
         <option value="svg">SVG</option>
+        <option value="png" selected="selected">PNG</option>
         <option value="jpeg">JPEG (requires ImageMagick)</option>
     </param>
 
