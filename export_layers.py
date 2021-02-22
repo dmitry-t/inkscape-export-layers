@@ -10,7 +10,7 @@ import tempfile
 
 sys.path.append('/usr/share/inkscape/extensions')
 import inkex
-inkex.localization.localize()
+#inkex.localization.localize()
 
 Layer = collections.namedtuple('Layer', ['id', 'label', 'tag'])
 Export = collections.namedtuple('Export', ['visible_layers', 'file_name'])
@@ -27,12 +27,18 @@ JPEG = 'jpeg'
 class LayerExport(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.arg_parser.add_argument('-o', '--output-dir',
+        self.arg_parser.add_argument('-o', '--output-source',
                                      action='store',
                                      type=str,
-                                     dest='output_dir',
+                                     dest='output_source',
                                      default='~/',
-                                     help='Path to an output directory')
+                                     help='Path to source file in output directory')
+        self.arg_parser.add_argument('--output-subdir',
+                                     action='store',
+                                     type=str,
+                                     dest='output_subdir',
+                                     default='',
+                                     help='name of sub-directory in output path')
         self.arg_parser.add_argument('-f', '--file-type',
                                      action='store',
                                      choices=(PDF, PNG, SVG, JPEG),
@@ -56,7 +62,7 @@ class LayerExport(inkex.Effect):
                                      type=str,
                                      dest='enumerate',
                                      default=None,
-                                     help="Export DPI value")
+                                     help="suffix of files exported")
 
     def effect(self):
         
@@ -64,7 +70,31 @@ class LayerExport(inkex.Effect):
         self.options.fit_contents = True if self.options.fit_contents == 'true' else False
         self.options.enumerate    = True if self.options.enumerate    == 'true' else False
 
-        output_dir = os.path.expanduser(self.options.output_dir)
+        #get output dir from specified source file
+        #otherwise set it as $HOME
+        source = self.options.output_source
+        inkex.utils.debug(source)
+        if os.path.isfile(source):
+            output_dir = os.path.dirname(source)
+            prefix = os.path.splitext(os.path.basename(source))[0]
+        elif os.path.isdir(source):
+            #change the default filled in by inkscape to $HOME
+            inkex.utils.debug(os.path.basename(source))
+            if os.path.basename(source) == 'inkscape-export-layers':
+                output_dir = os.path.expanduser('~/')
+                prefix = ''
+            else:
+                output_dir = source
+                prefix = ''
+        else:
+            raise Exception('output_source not a file or a dir...')
+
+        #add subdir if one was passed
+        output_dir = os.path.join(output_dir, self.options.output_subdir)
+
+        inkex.utils.debug(output_dir)
+        inkex.utils.debug(prefix)
+        exit()
         if not os.path.exists(os.path.join(output_dir)):
             os.makedirs(os.path.join(output_dir))
 

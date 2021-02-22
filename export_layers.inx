@@ -6,14 +6,22 @@
 
     <dependency type="executable" location="inx">export_layers.py</dependency>
 
-    <param name="output-dir" type="string" _gui-text="Directory to export to">~/</param>
+    <param name="help" type="description"> If you pick a file below, its directory will become the base directory for outputs 
+         and its filename will be the prefix of all outputted files. 
+         I am doing this as there are apparently no other way to know the source directory and filename 
+         in an inkscape extension. 
+    </param>
 
-    <param name="fit-contents" type="optiongroup" appearance="minimal" _gui-text="Area to export">
+    <param name="output-source" type="path" _gui-text="Pick source file" default="apples">/home/dominik/Documents/travail/</param>
+
+    <param name="output-subdir" type="string" _gui-text="Sub-directory to export to">layers/</param>
+
+    <param name="fit-contents" type="optiongroup"  _gui-text="Area to export">
         <option value="false" selected="selected">Use document boundaries</option>
         <option value="true">Fit to document contents</option>
     </param>
 
-    <param name="file-type" type="optiongroup" appearance="minimal" _gui-text="Output file type">
+    <param name="file-type" type="optiongroup"  _gui-text="Output file type">
         <option value="pdf">PDF</option>
         <option value="svg">SVG</option>
         <option value="png" selected="selected">PNG</option>
@@ -22,7 +30,7 @@
 
     <param name="dpi" type="int" min="1" max="1024" _gui-text="Export DPI">96</param>
 
-    <param name="enumerate" type="boolean" _gui-text="Add number prefixes to exported filenames (001_, 002_ etc)">true
+    <param name="enumerate" type="boolean" _gui-text="Add number suffix to exported filenames (_001, _002 etc)">false
     </param>
 
     <param name="help" type="description">Every layer marked with the prefix "[export]" is exported into a separate
