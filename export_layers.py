@@ -9,9 +9,9 @@ import subprocess
 import sys
 import tempfile
 
+sys.path.append('/usr/share/inkscape/extensions')
 import inkex
 
-sys.path.append('/usr/share/inkscape/extensions')
 # inkex.localization.localize()
 
 Layer = collections.namedtuple('Layer', ['id', 'label', 'tag'])
