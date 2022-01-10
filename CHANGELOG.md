@@ -8,14 +8,21 @@ Please use the following tags when editing this file:
 *Removed* for now removed features.
 *Fixed* for any bug fixes. 
 
-## [3.0.0] - 2021-02-23
+## Version 3.1
+### Changed
+- Output SVGs do not contain layers that are not exported (were hidden before)
+- JPEG does not require ImageMagick anymore
+### Fixed
+- Do not open extra Inkscape UI during export
+
+## Version 3.0
 ### Added
 - Selector for output directory
-- Option to progressively include content in layers. 
+- Option to progressively include content in layers
 - Possibility of adding a sub-directory for exported files
-### Changed 
+### Changed
 - Output file format is now: /path/to/output/directory/\[subdirectory/\]\[prefix_\]\[number_\]layer_name.ext 
-  with [subdirectory], [prefix] and [number] being optionnal
+  with [subdirectory], [prefix] and [number] being optional
 ### Fixed
-- Use inkscape order for svg
+- Use Inkscape order for SVG
 
