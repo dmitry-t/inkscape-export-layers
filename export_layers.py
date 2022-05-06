@@ -245,6 +245,7 @@ class LayerExport(inkex.Effect):
             'inkscape', str(svg_file),
             '--export-area-drawing' if self.options.fit_contents else
             '--export-area-page',
+            '--export-dpi=' + str(self.options.dpi),
             '--export-type', out_type,
             '--export-filename', str(output_file),
         ] + list(extra_args)
