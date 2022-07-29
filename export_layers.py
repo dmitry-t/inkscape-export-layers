@@ -87,7 +87,8 @@ class LayerExport(inkex.Effect):
 
         with _make_temp_directory() as tmp_dir:
             for export in export_list:
-                svg_file = self.export_to_svg(export, tmp_dir)
+                remove_layers = (self.options.file_type == SVG)
+                svg_file = self.export_to_svg(export, tmp_dir, remove_layers)
 
                 if self.options.file_type == PNG:
                     if not self.convert_svg_to_png(svg_file, output_dir, prefix):
@@ -184,11 +185,13 @@ class LayerExport(inkex.Effect):
 
         return export_list
 
-    def export_to_svg(self, export: Export, output_dir: Path) -> Path:
+    def export_to_svg(self, export: Export, output_dir: Path,
+                      remove_layers: bool) -> Path:
         """
         Export a current document to an Inkscape SVG file.
         :arg Export export: Export description.
         :arg str output_dir: Path to an output directory.
+        :arg boo remove_layers: Remove non-exported layers.
         :return Output file path.
         """
         document = copy.deepcopy(self.document)
@@ -199,8 +202,10 @@ class LayerExport(inkex.Effect):
         for layer in svg_layers:
             if layer.attrib['id'] in export.visible_layers:
                 layer.attrib['style'] = 'display:inline'
-            else:
+            elif remove_layers:
                 document.getroot().remove(layer)
+            else:
+                layer.attrib['style'] = 'display:none'
 
         output_file = output_dir / (export.file_name + '.svg')
         document.write(str(output_file))

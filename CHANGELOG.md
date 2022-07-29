@@ -8,6 +8,10 @@ Please use the following tags when editing this file:
 *Removed* for now removed features.
 *Fixed* for any bug fixes. 
 
+## Version 3.1.1
+### Fixed
+- Object clones are now exported correctly to raster images
+
 ## Version 3.1
 ### Changed
 - Output SVGs do not contain layers that are not exported (were hidden before)
@@ -25,4 +29,3 @@ Please use the following tags when editing this file:
   with [subdirectory], [prefix] and [number] being optional
 ### Fixed
 - Use Inkscape order for SVG
-
