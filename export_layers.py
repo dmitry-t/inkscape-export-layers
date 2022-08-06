@@ -196,7 +196,8 @@ class LayerExport(inkex.Effect):
         """
         document = copy.deepcopy(self.document)
 
-        svg_layers = document.xpath('//svg:g[@inkscape:groupmode="layer"]',
+        # Only process high-level layers, treat sub-layers as groups
+        svg_layers = document.xpath('/svg:svg/svg:g[@inkscape:groupmode="layer"]',
                                     namespaces=inkex.NSS)
 
         for layer in svg_layers:
