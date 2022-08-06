@@ -8,6 +8,11 @@ Please use the following tags when editing this file:
 *Removed* for now removed features.
 *Fixed* for any bug fixes. 
 
+## Version 3.3
+### Changed
+- Simplified UI. Now output directory and prefix are specified independently.
+  NB: This breaks CLI backward compatibility
+
 ## Version 3.2
 ### Added
 - Enable sub-layer support, treat sub-layers in the same way as groups
