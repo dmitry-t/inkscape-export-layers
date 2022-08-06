@@ -8,6 +8,10 @@ Please use the following tags when editing this file:
 *Removed* for now removed features.
 *Fixed* for any bug fixes. 
 
+## Version 3.2
+### Added
+- Enable sub-layer support, treat sub-layers in the same way as groups
+
 ## Version 3.1.1
 ### Fixed
 - Object clones are now exported correctly to raster images
