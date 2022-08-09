@@ -1,12 +1,9 @@
-# Inkscape Export Layers 3.3.1
+# Inkscape Export Layers
 
 Inkscape extension to export SVG layers as standalone PDF, PNG, SVG or JPEG images.
 The exported images can progressively reveal content of an Inkscape document. 
 
 This version works with Inkscape version 1.
-
-The code here heavily relies on previous work by github users: @jespino and @dmitry-t. Great thanks to you both!
-Let me know if anyone else deserves credit for this. 
 
 ## How it works
 
@@ -49,7 +46,7 @@ To use the extension once your layers are ready:
 
 ## Use with beamer
 
-I mainly use this extension to make presentation with LateX+Beamer. Here are a few steps that will get you started in this direction.
+If you use this extension to make presentation with LateX+Beamer, here are a few steps that will get you started in this direction.
 
 1. Pick a 16-9 aspect ratio for your source Inkscape document. 
 1. Setup the layers you want to export in the order that you would like. 
@@ -72,5 +69,5 @@ I mainly use this extension to make presentation with LateX+Beamer. Here are a f
    
    \end{document}
    ```
-1. Compile  (I highly recommend `latexmk -pdf` which will handle compilation on its own and recompile when source files change)
+1. Compile (highly recommended `latexmk -pdf` which will handle compilation on its own and recompile when source files change)
 
