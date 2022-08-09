@@ -56,18 +56,32 @@ class LayerExport(inkex.Effect):
                             help="Show exported layers below the current layer")
 
     def effect(self):
-        output_dir = self.options.output_dir.expanduser()
-
-        # If a path is relative, Inkscape treats it's relative to the extension dir
-        try:
-            # Make the relative directory relative to the SVG directory
-            output_dir = output_dir.relative_to(self.ext_path())
-            # Extra step to fix weird behavior on Windows (C:\ext_path\~\rel_path)
-            output_dir = output_dir.expanduser()
-            if not output_dir.is_absolute():
-                output_dir = self.svg_path() / output_dir
-        except ValueError:
-            output_dir = self.options.output_dir.expanduser()
+        output_dir = self.options.output_dir
+        # If a directory is not specified, Inkscape passes '~'.
+        # Inkscape treats relative paths w.r.t. the extension directory,
+        # which is working directory at the same time.
+        # Possible cases (user input -> extension input -> extension output):
+        # User: '' -> input: '~' -> output: '/svg_dir'
+        # User: '~' -> input: '/ext_dir/~' -> output: '/home_dir'
+        # User: 'rel_path' -> input: '/ext_dir/rel_path' -> output: '/svg_dir/rel_path'
+        # User: '.' -> input: '/ext_dir' -> output: '/svg_dir'
+        # User: 'abs_path' -> input: '/abs_path' -> output: '/abs_path'
+        if output_dir == Path('~'):
+            # Output directory is unspecified by a user
+            output_dir = Path(self.svg_path())
+        else:
+            try:
+                # Make the directory relative to the SVG directory
+                # self.ext_path() is empty in Inkscape 1.2.1 so calculate
+                ext_path = Path(__file__).parent.absolute()
+                output_dir = output_dir.relative_to(ext_path)
+                # Expand possible '~' in the middle of the path
+                output_dir = output_dir.expanduser()
+                if not output_dir.is_absolute():
+                    # No ~ in the middle, truly relative path
+                    output_dir = self.svg_path() / output_dir
+            except ValueError:
+                pass
 
         output_dir.mkdir(exist_ok=True)
 
