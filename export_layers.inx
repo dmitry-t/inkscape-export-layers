@@ -6,44 +6,47 @@
 
     <dependency type="executable" location="inx">export_layers.py</dependency>
 
-    <param name="help" type="description">  Export layers to different files   </param>
-    <param name="help" type="description">  </param>
-    <param name="help" type="description">  - Layers with a name starting with "[fixed]" or "[f]" are always exported.   </param>
-    <param name="help" type="description">  - Layers with a name starting with "[export]" or "[e]" are progressively exported in their respective order.   </param>
-    <param name="help" type="description">  - All other layers are ignored.   </param>
-    <param name="help" type="description">  </param>
-    <param name="help" type="description">  Output filename is of the form: </param>
-    <param name="help" type="description">    /path/to/output/directory/[subdirectory/][prefix_][number_]layer_name.ext  </param>
-    <param name="help" type="description">  with [subdirectory], [prefix] and [number] being optional </param>
-    <param name="help" type="description">  </param>
-    <param name="help" type="description">  If you pick a file below,     </param>
-    <param name="help" type="description">  - Its directory will be the '/path/to/output/directory/'.   </param>
-    <param name="help" type="description">  - Its filename will start with [prefix] (leave filename empty for no prefix)   </param>
-    <param name="help" type="description"> If you leave this box empty, default output directory will be '~/' with no prefix    </param>
-    <param name="output-source" type="path" _gui-text="Source file"></param>
-    <param name="help" type="description">     </param>
-    <param name="help" type="description"> Name of [subdirectory/] to export to (leave empty for no subdirectory)     </param>
-    <param name="output-subdir" type="string" _gui-text="Sub-directory">layers/</param>
-    <param name="help" type="description">     </param>
-    <param name="enumerate" type="boolean" _gui-text="Add layer {number} to filenames ('001', '002', etc.)">false</param>
-    <param name="help" type="description">     </param>
+    <label>
+        Export layers to different files<br/>
+        - Layers with a name starting with "[fixed]" or "[f]" are always exported.<br/>
+        - Layers with a name starting with "[export]" or "[e]" are progressively exported in their respective order.<br/>
+        - All other layers are ignored.<br/>
+        - Sublayers and groups inside exported layers are exported if visible.
+    </label>
+
+    <label/>
+
+    <label>The output directory can be absolute or relative to the original SVG directory. Use "~" to address the home directory.</label>
+    <param name="output-dir" type="path" mode="folder" _gui-text="Output directory"></param>
+
+    <label/>
+
+    <label>An output filename is [prefix][number_]label.ext".</label>
+    <param name="prefix" type="string" _gui-text="Filenames prefix"></param>
+    <param name="enumerate" type="boolean" _gui-text="Also add layer number to filenames ('001', '002', etc.)">false</param>
+
+    <label/>
 
     <param name="fit-contents" type="optiongroup"  _gui-text="Area to export">
         <option value="false" selected="selected">Use document boundaries</option>
         <option value="true">Use layer content boundaries</option>
     </param>
 
-    <param name="help" type="description">     </param>
-    <param name="help" type="description"> Show all exported layers below the current layer.     </param>
+    <label/>
+
+    <label>Show all exported layers below the current layer.</label>
     <param name="show-layers-below" type="boolean" _gui-text="Progressively reveal elements of a figure">true</param>
 
-    <param name="help" type="description">     </param>
+    <label/>
+
     <param name="file-type" type="optiongroup"  _gui-text="Output file type">
-        <option value="pdf" selected="selected">PDF</option>
-        <option value="svg">SVG</option>
-        <option value="png">PNG</option>
+        <option value="png" selected="selected">PNG</option>
         <option value="jpeg">JPEG</option>
+        <option value="svg">SVG</option>
+        <option value="pdf">PDF</option>
     </param>
+
+    <label/>
 
     <param name="dpi" type="int" min="1" max="1024" _gui-text="Export DPI (for raster formats)">96</param>
 

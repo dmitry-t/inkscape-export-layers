@@ -32,13 +32,16 @@ class LayerExport(inkex.Effect):
     def add_arguments(self, parser):
         super().add_arguments(parser)
 
-        parser.add_argument('-o', '--output-source',
+        parser.add_argument('-o', '--output-dir',
                             type=Path,
                             default='~/',
-                            help='Path to source file in output directory')
-        parser.add_argument('--output-subdir',
+                            help='Path to output directory')
+        parser.add_argument('--prefix',
                             default='',
-                            help='Name of sub-directory in output path')
+                            help='Prefix for exported file names')
+        parser.add_argument('--enumerate',
+                            type=inkex.Boolean,
+                            help="Extra prefix for exported file names")
         parser.add_argument('-f', '--file-type',
                             choices=(PDF, PNG, SVG, JPEG),
                             help='Exported file type')
@@ -48,36 +51,23 @@ class LayerExport(inkex.Effect):
         parser.add_argument('--dpi',
                             type=int,
                             help="Export DPI value")
-        parser.add_argument('--enumerate',
-                            type=inkex.Boolean,
-                            help="Prefix for exported file names")
         parser.add_argument('--show-layers-below',
                             type=inkex.Boolean,
                             help="Show exported layers below the current layer")
 
     def effect(self):
-        # get output dir from specified source file
-        # otherwise set it as $HOME
-        source = self.options.output_source.expanduser()
-        source = self.options.output_source
-        if source.is_file():
-            output_dir = source.parent
-            prefix = source.stem + '_'
-        elif source.is_dir():
-            # change the default filled in by inkscape to $HOME
-            if source == Path(self.ext_path()):
-                output_dir = Path.home()
-                prefix = ''
-            else:
-                output_dir = source
-                prefix = ''
-        else:
-            # a new directory to be created
-            output_dir = source
-            prefix = ''
+        output_dir = self.options.output_dir.expanduser()
 
-        # add subdir if one was passed
-        output_dir = output_dir / self.options.output_subdir
+        # If a path is relative, Inkscape treats it's relative to the extension dir
+        if output_dir.is_relative_to(self.ext_path()):
+            # Make the relative directory relative to the SVG directory
+            output_dir = output_dir.relative_to(self.ext_path())
+            # Extra step to fix weird behavior on Windows (C:\ext_path\~\rel_path)
+            output_dir = output_dir.expanduser()
+            if not output_dir.is_absolute():
+                output_dir = self.svg_path() / output_dir
+        else:
+            output_dir = self.options.output_dir.expanduser()
 
         output_dir.mkdir(exist_ok=True)
 
@@ -91,18 +81,23 @@ class LayerExport(inkex.Effect):
                 svg_file = self.export_to_svg(export, tmp_dir, remove_layers)
 
                 if self.options.file_type == PNG:
-                    if not self.convert_svg_to_png(svg_file, output_dir, prefix):
+                    if not self.convert_svg_to_png(svg_file, output_dir,
+                                                   self.options.prefix):
                         break
                 elif self.options.file_type == SVG:
-                    if not self.convert_svg_to_svg(svg_file, output_dir, prefix):
+                    if not self.convert_svg_to_svg(svg_file, output_dir,
+                                                   self.options.prefix):
                         break
                 elif self.options.file_type == PDF:
-                    if not self.convert_svg_to_pdf(svg_file, output_dir, prefix):
+                    if not self.convert_svg_to_pdf(svg_file, output_dir,
+                                                   self.options.prefix):
                         break
                 elif self.options.file_type == JPEG:
                     if not self.convert_png_to_jpeg(
-                            self.convert_svg_to_png(svg_file, tmp_dir, prefix),
-                            output_dir, prefix=''):
+                            self.convert_svg_to_png(svg_file, tmp_dir,
+                                                    self.options.prefix),
+                            output_dir,
+                            prefix=''):
                         break
 
     def get_layer_list(self):
