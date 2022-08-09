@@ -12,6 +12,7 @@ Please use the following tags when editing this file:
 ### Changed
 - Simplified UI. Now output directory and prefix are specified independently.
   NB: This breaks CLI backward compatibility
+- Treat a relative output directory as relative to the original SGV file.
 
 ## Version 3.2
 ### Added
