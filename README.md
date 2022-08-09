@@ -1,4 +1,4 @@
-# Inkscape Export Layers 3.3
+# Inkscape Export Layers 3.3.1
 
 Inkscape extension to export SVG layers as standalone PDF, PNG, SVG or JPEG images.
 The exported images can progressively reveal content of an Inkscape document. 

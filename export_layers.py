@@ -59,14 +59,14 @@ class LayerExport(inkex.Effect):
         output_dir = self.options.output_dir.expanduser()
 
         # If a path is relative, Inkscape treats it's relative to the extension dir
-        if output_dir.is_relative_to(self.ext_path()):
+        try:
             # Make the relative directory relative to the SVG directory
             output_dir = output_dir.relative_to(self.ext_path())
             # Extra step to fix weird behavior on Windows (C:\ext_path\~\rel_path)
             output_dir = output_dir.expanduser()
             if not output_dir.is_absolute():
                 output_dir = self.svg_path() / output_dir
-        else:
+        except ValueError:
             output_dir = self.options.output_dir.expanduser()
 
         output_dir.mkdir(exist_ok=True)

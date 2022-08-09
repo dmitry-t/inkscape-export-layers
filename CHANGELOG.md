@@ -8,11 +8,15 @@ Please use the following tags when editing this file:
 *Removed* for now removed features.
 *Fixed* for any bug fixes. 
 
+## Version 3.3.1
+### Changed
+- Change supported Python version from 3.9 to 3.8
+
 ## Version 3.3
 ### Changed
 - Simplified UI. Now output directory and prefix are specified independently.
   NB: This breaks CLI backward compatibility
-- Treat a relative output directory as relative to the original SGV file.
+- Treat a relative output directory as relative to the original SGV file
 
 ## Version 3.2
 ### Added
