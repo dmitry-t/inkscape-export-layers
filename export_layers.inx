@@ -34,7 +34,7 @@
 
     <label/>
 
-    <label>Show all exported layers below the current layer.</param>
+    <label>Show all exported layers below the current layer.</label>
     <param name="show-layers-below" type="boolean" _gui-text="Progressively reveal elements of a figure">true</param>
 
     <label/>
