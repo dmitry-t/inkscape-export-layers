@@ -16,9 +16,7 @@
 
     <label/>
 
-    <label>
-        The output directory can be absolute or relative to the original SVG directory. Use "~" to address the home directory.
-    </label>
+    <label>The output directory can be absolute or relative to the original SVG directory. Use "~" to address the home directory.</label>
     <param name="output-dir" type="path" mode="folder" _gui-text="Output directory"></param>
 
     <label/>
