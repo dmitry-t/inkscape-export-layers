@@ -7,6 +7,7 @@ import copy
 import shutil
 import subprocess
 import sys
+import os
 import tempfile
 
 sys.path.append('/usr/share/inkscape/extensions')
@@ -255,6 +256,8 @@ class LayerExport(inkex.Effect):
     def _convert_svg(self, svg_file: Path, output_dir: Path,
                      prefix: str, out_type: str, extra_args=()) -> Path:
         output_file = output_dir / (prefix + svg_file.stem + '.' + out_type)
+
+        os.environ["SELF_CALL"] = "true"
 
         command = [
             'inkscape', str(svg_file),
