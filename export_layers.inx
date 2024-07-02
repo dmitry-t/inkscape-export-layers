@@ -27,6 +27,10 @@
 
     <label/>
 
+    <param name="visible-only" type="boolean" _gui-text="Export visible layers only">false</param>
+
+    <label/>
+
     <param name="fit-contents" type="optiongroup"  _gui-text="Area to export">
         <option value="false" selected="selected">Use document boundaries</option>
         <option value="true">Use layer content boundaries</option>

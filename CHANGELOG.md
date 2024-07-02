@@ -8,6 +8,10 @@ Please use the following tags when editing this file:
 *Removed* for now removed features.
 *Fixed* for any bug fixes. 
 
+## Version 3.3.3
+### Added
+- Option to export visible layers only
+
 ## Version 3.3.2
 ### Fixed
 - Fix relative path processing

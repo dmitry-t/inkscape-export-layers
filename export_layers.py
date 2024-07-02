@@ -14,7 +14,7 @@ import inkex
 
 # inkex.localization.localize()
 
-Layer = collections.namedtuple('Layer', ['id', 'label', 'tag'])
+Layer = collections.namedtuple('Layer', ['id', 'label', 'tag', 'is_visible'])
 Export = collections.namedtuple('Export', ['visible_layers', 'file_name'])
 
 FIXED = '[fixed]'
@@ -39,6 +39,9 @@ class LayerExport(inkex.Effect):
         parser.add_argument('--prefix',
                             default='',
                             help='Prefix for exported file names')
+        parser.add_argument('--visible-only',
+                            type=inkex.Boolean,
+                            help="Export visible layers only")
         parser.add_argument('--enumerate',
                             type=inkex.Boolean,
                             help="Extra prefix for exported file names")
@@ -87,7 +90,8 @@ class LayerExport(inkex.Effect):
 
         layer_list = self.get_layer_list()
         export_list = self.get_export_list(
-            layer_list, self.options.show_layers_below)
+            layer_list, self.options.show_layers_below,
+            self.options.visible_only)
 
         with _make_temp_directory() as tmp_dir:
             for export in export_list:
@@ -130,6 +134,7 @@ class LayerExport(inkex.Effect):
 
             layer_id = layer.attrib['id']
             layer_label = layer.attrib[label_attrib_name]
+            layer_is_visible = layer.attrib['style'] == 'display:inline'
 
             if layer_label.lower().startswith(FIXED):
                 layer_type = FIXED
@@ -146,11 +151,12 @@ class LayerExport(inkex.Effect):
             else:
                 continue
 
-            layer_list.append(Layer(layer_id, layer_label, layer_type))
+            layer_list.append(Layer(layer_id, layer_label, layer_type,
+                                    layer_is_visible))
 
         return layer_list
 
-    def get_export_list(self, layer_list, show_layers_below):
+    def get_export_list(self, layer_list, show_layers_below, visible_only):
         """selection of layers that should be visible
 
             Each element of this list will be exported in its own file
@@ -159,6 +165,9 @@ class LayerExport(inkex.Effect):
 
         for counter, layer in enumerate(layer_list):
             # each layer marked as '[export]' is the basis for making a figure that will be exported
+
+            if visible_only and not layer.is_visible:
+                continue
 
             if layer.tag == FIXED:
                 # Fixed layers are not the basis of exported figures
@@ -173,15 +182,15 @@ class LayerExport(inkex.Effect):
                         # fixed layers appear in all figures
                         # irrespective of their position relative to other layers
                         visible_layers.add(other_layer.id)
-                    else:
-                        if other_layer.id == layer.id:
-                            # the basis layer for this figure is always visible
-                            visible_layers.add(other_layer.id)
-                            # all subsequent layers will be above
-                            layer_is_below = False
 
-                        elif layer_is_below and show_layers_below:
-                            visible_layers.add(other_layer.id)
+                    elif other_layer.id == layer.id:
+                        # the basis layer for this figure is always visible
+                        visible_layers.add(other_layer.id)
+                        # all subsequent layers will be above
+                        layer_is_below = False
+
+                    elif layer_is_below and show_layers_below:
+                        visible_layers.add(other_layer.id)
 
                 layer_name = layer.label
                 if self.options.enumerate:
