@@ -8,6 +8,14 @@ Please use the following tags when editing this file:
 *Removed* for now removed features.
 *Fixed* for any bug fixes. 
 
+## Version 3.3.4
+### Added
+- Diagnostic warning for cases where tagged are groups instead of layers
+### Fixed
+- Create all intermediate parent directories of an output directory.
+  Previously a longer output directory path crashed the extension.
+- Fix issue where layer did not have a `style` attribute.
+
 ## Version 3.3.3
 ### Added
 - Option to export visible layers only

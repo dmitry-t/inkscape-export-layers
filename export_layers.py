@@ -1,21 +1,35 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
-import collections
 import contextlib
 import copy
+from dataclasses import dataclass
+from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
+from typing import List, Tuple
 
-sys.path.append('/usr/share/inkscape/extensions')
+if sys.platform == 'linux': sys.path.append('/usr/share/inkscape/extensions')  # noqa
+if sys.platform == 'win32': sys.path.append(r'c:\Program Files\Inkscape\share\inkscape\extensions')  # noqa
 import inkex
 
 # inkex.localization.localize()
 
-Layer = collections.namedtuple('Layer', ['id', 'label', 'tag', 'is_visible'])
-Export = collections.namedtuple('Export', ['visible_layers', 'file_name'])
+@dataclass
+class Group:
+    id: str
+    label: str  # tag + name
+    name: str
+    tag: str
+    is_visible: bool
+
+
+@dataclass
+class Export:
+    visible_layers: List[str]
+    file_name: str
+
 
 FIXED = '[fixed]'
 F = '[f]'
@@ -86,15 +100,40 @@ class LayerExport(inkex.Effect):
             except ValueError:
                 pass
 
-        output_dir.mkdir(exist_ok=True)
+        output_dir.mkdir(parents=True, exist_ok=True)
 
-        layer_list = self.get_layer_list()
+        # Check if there are erroneously tagged groups
+        tagged_group_list = self.get_group_list(layers=False)
+        if tagged_group_list:
+            print('WARNING!\n'
+                  f'Only {"visible " if self.options.visible_only else ""}'
+                  'tagged layers participate in exporting.\n'
+                  'These groups are tagged perhaps by mistake:\n'
+                  f'{", ".join(group.label for group in tagged_group_list)}\n',
+                  file=sys.stderr)
+
+        layer_list = self.get_group_list(layers=True)
+
+        # print('Found layers: ' +
+        #       ', '.join(f'{layer.id}/{layer.name}' for layer in layer_list),
+        #       file=sys.stderr)
+
         export_list = self.get_export_list(
-            layer_list, self.options.show_layers_below,
-            self.options.visible_only)
+            layer_list, self.options.show_layers_below, self.options.visible_only)
+        if not export_list:
+            print('WARNING!\n'
+                  'Nothing to export.\n'
+                  'There are no '
+                  f'{"visible " if self.options.visible_only else ""}'
+                  f'layers tagged with {EXPORT} or {E}\n',
+                  file=sys.stderr)
 
         with _make_temp_directory() as tmp_dir:
-            for export in export_list:
+            for export_idx, export in enumerate(export_list):
+                # print(f'({export_idx}/{len(export_list)})'
+                #       f' Exporting layers [{", ".join(export.visible_layers)}]'
+                #       f' as {export.file_name}... ', end='', file=sys.stderr)
+
                 remove_layers = (self.options.file_type == SVG)
                 svg_file = self.export_to_svg(export, tmp_dir, remove_layers)
 
@@ -118,50 +157,64 @@ class LayerExport(inkex.Effect):
                             prefix=''):
                         break
 
-    def get_layer_list(self):
+    def get_group_list(self, layers: bool) -> List[Group]:
         """
-        Make a list of layers in source svg file
-        Elements of the list are of the form (id, label (layer name), tag ('[fixed]' or '[export]')
+        Make a list of groups in source svg file
         """
-        svg_layers = self.document.xpath('//svg:g[@inkscape:groupmode="layer"]',
-                                         namespaces=inkex.NSS)
-        layer_list = []
+        if layers:
+            xpath_query = '//svg:g[@inkscape:groupmode="layer"]'
+        else:
+            xpath_query = '//svg:g[not(@inkscape:groupmode="layer")]'
 
-        for layer in svg_layers:
-            label_attrib_name = '{%s}label' % layer.nsmap['inkscape']
-            if label_attrib_name not in layer.attrib:
+        group_xml_list = self.document.xpath(xpath_query, namespaces=inkex.NSS)
+
+        group_list = []
+
+        for group_xml in group_xml_list:
+            label_attrib_name = '{%s}label' % group_xml.nsmap['inkscape']
+
+            if label_attrib_name not in group_xml.attrib:
                 continue
 
-            layer_id = layer.attrib['id']
-            layer_label = layer.attrib[label_attrib_name]
-            layer_is_visible = layer.attrib['style'] == 'display:inline'
+            id = group_xml.attrib['id']
+            label = group_xml.attrib[label_attrib_name]
+            is_visible = group_xml.attrib.get('style') == 'display:inline'
+            tag = ''
 
-            if layer_label.lower().startswith(FIXED):
-                layer_type = FIXED
-                layer_label = layer_label[len(FIXED):].lstrip()
-            elif layer_label.lower().startswith(F):
-                layer_type = FIXED
-                layer_label = layer_label[len(F):].lstrip()
-            elif layer_label.lower().startswith(EXPORT):
-                layer_type = EXPORT
-                layer_label = layer_label[len(EXPORT):].lstrip()
-            elif layer_label.lower().startswith(E):
-                layer_type = EXPORT
-                layer_label = layer_label[len(E):].lstrip()
-            else:
+            label_lower = label.lower()
+            if label_lower.startswith(FIXED):
+                tag = FIXED
+                name = label[len(FIXED):].lstrip()
+            elif label_lower.startswith(F):
+                tag = FIXED
+                name = label[len(F):].lstrip()
+            elif label_lower.startswith(EXPORT):
+                tag = EXPORT
+                name = label[len(EXPORT):].lstrip()
+            elif label_lower.startswith(E):
+                tag = EXPORT
+                name = label[len(E):].lstrip()
+
+            if not tag:
                 continue
 
-            layer_list.append(Layer(layer_id, layer_label, layer_type,
-                                    layer_is_visible))
+            group_list.append(Group(id=id,
+                                    label=label,
+                                    name=name,
+                                    tag=tag,
+                                    is_visible=is_visible))
 
-        return layer_list
+        return group_list
 
-    def get_export_list(self, layer_list, show_layers_below, visible_only):
-        """selection of layers that should be visible
-
-            Each element of this list will be exported in its own file
+    def get_export_list(self,
+                        layer_list: List[Group],
+                        show_layers_below: bool,
+                        visible_only: bool) -> List[Export]:
         """
-        export_list = []
+            Select layers that should be visible.
+            Each element of this list will be exported as a separate file
+        """
+        export_list: List[Export] = []
 
         for counter, layer in enumerate(layer_list):
             # each layer marked as '[export]' is the basis for making a figure that will be exported
@@ -192,7 +245,7 @@ class LayerExport(inkex.Effect):
                     elif layer_is_below and show_layers_below:
                         visible_layers.add(other_layer.id)
 
-                layer_name = layer.label
+                layer_name = layer.name
                 if self.options.enumerate:
                     layer_name = '{:03d}_{}'.format(counter + 1, layer_name)
 
@@ -282,7 +335,10 @@ class LayerExport(inkex.Effect):
 
         return output_file
 
-    def convert_png_to_jpeg(self, png_file, output_dir, prefix):
+    def convert_png_to_jpeg(self,
+                            png_file: Path,
+                            output_dir: Path,
+                            prefix: str) -> Path:
         """
         Convert a PNG file into a JPEG file.
         :param str png_file: Path an input PNG file.
