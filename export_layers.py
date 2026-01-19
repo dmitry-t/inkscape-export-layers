@@ -3,18 +3,23 @@
 import contextlib
 import copy
 from dataclasses import dataclass
+from multiprocessing.pool import ThreadPool
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
-from typing import List, Tuple
 
-if sys.platform == 'linux': sys.path.append('/usr/share/inkscape/extensions')  # noqa
-if sys.platform == 'win32': sys.path.append(r'c:\Program Files\Inkscape\share\inkscape\extensions')  # noqa
+if sys.platform == 'linux':
+    sys.path.append('/usr/share/inkscape/extensions')  # noqa
+
+if sys.platform == 'win32':
+    sys.path.append(r'c:\Program Files\Inkscape\share\inkscape\extensions')  # noqa
+
 import inkex
 
 # inkex.localization.localize()
+
 
 @dataclass
 class Group:
@@ -27,7 +32,7 @@ class Group:
 
 @dataclass
 class Export:
-    visible_layers: List[str]
+    visible_layers: list[str]
     file_name: str
 
 
@@ -71,6 +76,10 @@ class LayerExport(inkex.Effect):
         parser.add_argument('--show-layers-below',
                             type=inkex.Boolean,
                             help="Show exported layers below the current layer")
+        parser.add_argument('--num-cpus',
+                            type=int,
+                            default=4,
+                            help="Number of CPUs to use")
 
     def effect(self):
         output_dir = self.options.output_dir
@@ -128,36 +137,37 @@ class LayerExport(inkex.Effect):
                   f'layers tagged with {EXPORT} or {E}\n',
                   file=sys.stderr)
 
-        with _make_temp_directory() as tmp_dir:
-            for export_idx, export in enumerate(export_list):
-                # print(f'({export_idx}/{len(export_list)})'
-                #       f' Exporting layers [{", ".join(export.visible_layers)}]'
-                #       f' as {export.file_name}... ', end='', file=sys.stderr)
-
+        with _make_temp_directory() as tmp_dir, ThreadPool(processes=self.options.num_cpus) as pool:
+            def export_file(export) -> None:
                 remove_layers = (self.options.file_type == SVG)
                 svg_file = self.export_to_svg(export, tmp_dir, remove_layers)
 
+                failed = False
                 if self.options.file_type == PNG:
                     if not self.convert_svg_to_png(svg_file, output_dir,
                                                    self.options.prefix):
-                        break
+                        failed = True
                 elif self.options.file_type == SVG:
                     if not self.convert_svg_to_svg(svg_file, output_dir,
                                                    self.options.prefix):
-                        break
+                        failed = True
                 elif self.options.file_type == PDF:
                     if not self.convert_svg_to_pdf(svg_file, output_dir,
                                                    self.options.prefix):
-                        break
+                        failed = True
                 elif self.options.file_type == JPEG:
                     if not self.convert_png_to_jpeg(
                             self.convert_svg_to_png(svg_file, tmp_dir,
                                                     self.options.prefix),
                             output_dir,
                             prefix=''):
-                        break
+                        failed = True
+                if failed:
+                    raise Exception(f'Failed to convert {svg_file}')
 
-    def get_group_list(self, layers: bool) -> List[Group]:
+            pool.map(export_file, export_list)
+
+    def get_group_list(self, layers: bool) -> list[Group]:
         """
         Make a list of groups in source svg file
         """
@@ -207,14 +217,14 @@ class LayerExport(inkex.Effect):
         return group_list
 
     def get_export_list(self,
-                        layer_list: List[Group],
+                        layer_list: list[Group],
                         show_layers_below: bool,
-                        visible_only: bool) -> List[Export]:
+                        visible_only: bool) -> list[Export]:
         """
             Select layers that should be visible.
             Each element of this list will be exported as a separate file
         """
-        export_list: List[Export] = []
+        export_list: list[Export] = []
 
         for counter, layer in enumerate(layer_list):
             # each layer marked as '[export]' is the basis for making a figure that will be exported

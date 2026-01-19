@@ -6,7 +6,11 @@ Please use the following tags when editing this file:
 *Changed* for changes in existing functionality.
 *Deprecated* for soon-to-be removed features.
 *Removed* for now removed features.
-*Fixed* for any bug fixes. 
+*Fixed* for any bug fixes.
+
+## Version 3.4.
+### Added
+- Option for multi-process export (`num-cpus`).
 
 ## Version 3.3.4
 ### Added
