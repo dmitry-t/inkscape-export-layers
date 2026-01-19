@@ -4,8 +4,6 @@
 
     <id>com.over9000.export-layers-3</id>
 
-    <dependency type="executable" location="inx">export_layers.py</dependency>
-
     <label>
         Export layers to different files<br/>
         - Layers with a name starting with "[fixed]" or "[f]" are always exported.<br/>
@@ -14,45 +12,40 @@
         - Sublayers and groups inside exported layers are exported if visible.
     </label>
 
-    <label/>
+    <spacer/>
 
     <label>The output directory can be absolute or relative to the original SVG directory. Use "~" to address the home directory.</label>
     <param name="output-dir" type="path" mode="folder" _gui-text="Output directory"></param>
 
-    <label/>
+    <spacer/>
 
     <label>An output filename is [prefix][number_]label.ext".</label>
     <param name="prefix" type="string" _gui-text="Filenames prefix"></param>
     <param name="enumerate" type="boolean" _gui-text="Also add layer number to filenames ('001', '002', etc.)">false</param>
 
-    <label/>
-
-    <param name="visible-only" type="boolean" _gui-text="Export visible layers only">false</param>
-
-    <label/>
+    <spacer/>
 
     <param name="fit-contents" type="optiongroup"  _gui-text="Area to export">
         <option value="false" selected="selected">Use document boundaries</option>
         <option value="true">Use layer content boundaries</option>
     </param>
+    <param name="visible-only" type="boolean" _gui-text="Export visible layers only">false</param>
+    <param name="show-layers-below" type="boolean" _gui-text="Progressively reveal elements of a figure. Show all exported layers below the current layer">true</param>
 
-    <label/>
+    <spacer/>
 
-    <label>Show all exported layers below the current layer.</label>
-    <param name="show-layers-below" type="boolean" _gui-text="Progressively reveal elements of a figure">true</param>
-
-    <label/>
-
-    <param name="file-type" type="optiongroup"  _gui-text="Output file type">
-        <option value="png" selected="selected">PNG</option>
+    <param name="file-type" type="optiongroup" appearance="combo" _gui-text="Output file type">
+        <option value="png" default="true">PNG</option>
         <option value="jpeg">JPEG</option>
         <option value="svg">SVG</option>
         <option value="pdf">PDF</option>
     </param>
 
-    <label/>
-
     <param name="dpi" type="int" min="1" max="1024" _gui-text="Export DPI (for raster formats)">96</param>
+
+    <spacer/>
+
+    <param name="num-cpus" type="int" min="1" max="12" _gui-text="Number of CPUs to use">4</param>
 
     <effect needs-live-preview="false">
         <object-type>all</object-type>
